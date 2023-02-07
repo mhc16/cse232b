@@ -63,6 +63,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 	@Override
 	public ArrayList<Node> visitApChildren(XQueryParser.ApChildrenContext ctx) {
 		visit(ctx.doc());
+		System.out.println(curNodes);
 		return visit(ctx.rp());
 
 	}
@@ -72,6 +73,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 	public ArrayList<Node> visitApAllDescendants(XQueryParser.ApAllDescendantsContext ctx) {
 		visit(ctx.doc());
 		curNodes = visitNodeListDescendants(curNodes);
+//		System.out.println(curNodes);
 		return visit(ctx.rp());
 	}
 
@@ -83,26 +85,22 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 		System.out.println(fileName);
 		// read file from resource folder
 		File fileDOM = null;
-//		ClassLoader classLoader = getClass().getClassLoader();
-//		try {
-//			URL targetURL = classLoader.getResource(fileName);
-//			// file not exist
-//			if (targetURL == null) {
-//				throw new IllegalArgumentException(fileName + "not found!");
-//			}
-//			fileDOM = new File(targetURL.toURI());
-//		} catch (Exception e) {
-//			// TODO: handle exception
-//			System.out.println("file not found!");
-//			System.exit(1);
-//		}
-		String resource = "src/main/resources";
-        fileDOM = Paths.get(resource, fileName).toAbsolutePath().toFile();
-        System.out.println(fileDOM);
-		// convert file into DOM node
+		ClassLoader classLoader = getClass().getClassLoader();
+		try {
+			URL targetURL = classLoader.getResource(fileName);
+			// file not exist
+			if (targetURL == null) {
+				throw new IllegalArgumentException(fileName + "not found!");
+			}
+			fileDOM = new File(targetURL.toURI());
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println("file not found!");
+			System.exit(1);
+		}
 		try {
 			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-//			documentBuilderFactory.setIgnoringElementContentWhitespace(true);
+			documentBuilderFactory.setIgnoringElementContentWhitespace(true);
 			DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 			Document document = documentBuilder.parse(fileDOM);
 			// add doc node
@@ -160,6 +158,8 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 	public ArrayList<Node> visitTagName(XQueryParser.TagNameContext ctx) {
 		String require = ctx.WORD().getText();
 		ArrayList<Node> result = new ArrayList<>();
+//		System.out.println("1"+require);
+//		System.out.println(curNodes);
 		for (Node node : curNodes) {
 			NodeList children = node.getChildNodes();
 			for (int i = 0; i < children.getLength(); i++) {
@@ -170,6 +170,8 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 			}
 		}
 		curNodes = result;
+//		System.out.println("2");
+//		System.out.println(curNodes);
 		return result;
 	}
 
