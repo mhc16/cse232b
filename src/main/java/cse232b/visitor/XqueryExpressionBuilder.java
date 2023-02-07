@@ -1,7 +1,9 @@
 package cse232b.visitor;
-import java.util.ArrayList;
 //java package
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+
 //antlr4 package
 import cse232b.parsers.XQueryBaseVisitor;
 import cse232b.parsers.XQueryParser;
@@ -12,95 +14,111 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class XqueryExpressionBuilder extends XQueryBaseVisitor<List<Node>> {
+public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> {
 	//use a nodelist to store the current visit node
-	private List<Node> curNodes = new ArrayList<Node>();
-	@Override public List<Node> visitApChildren(XQueryParser.ApChildrenContext ctx){
+	private ArrayList<Node> curNodes = new ArrayList<Node>();
+	//util function
+	//remove duplicate node
+	private ArrayList<Node> removeDuplicates(ArrayList<Node> list){
+		ArrayList<Node> result = new ArrayList<>();
+		HashSet<Node> unique = new HashSet<>();
+		for (Node ele : list) {
+			if (!unique.contains(ele)) {
+				unique.add(ele);
+				result.add(ele);
+			}
+		}
+		return result;
+	}
+	//doc then rp
+	@Override public ArrayList<Node> visitApChildren(XQueryParser.ApChildrenContext ctx){
+		visit(ctx.doc());
 		return visit(ctx.rp());
 
 	}
-
-	@Override public List<Node> visitApDescendants(XQueryParser.ApDescendantsContext ctx) { 
+	//doc then iterate all descendants then ap
+	@Override public ArrayList<Node> visitApDescendants(XQueryParser.ApDescendantsContext ctx) { 
+		visit(ctx.doc());
 		return visitChildren(ctx); 
 	}
 	
-	@Override public List<Node> visitXmlDoc(XQueryParser.XmlDocContext ctx) { 
+	@Override public ArrayList<Node> visitXmlDoc(XQueryParser.XmlDocContext ctx) { 
 		return visitChildren(ctx); 
 	}
 
-	@Override public List<Node> visitFileName(XQueryParser.FileNameContext ctx) { 
+	@Override public ArrayList<Node> visitFileName(XQueryParser.FileNameContext ctx) { 
 		return visitChildren(ctx); 
 	}
 
-	@Override public List<Node> visitTagName(XQueryParser.TagNameContext ctx) { 
+	@Override public ArrayList<Node> visitTagName(XQueryParser.TagNameContext ctx) { 
 		return visitChildren(ctx); 
 	}
 
-	@Override public List<Node> visitParent(XQueryParser.ParentContext ctx) { 
+	@Override public ArrayList<Node> visitParent(XQueryParser.ParentContext ctx) { 
 		return visitChildren(ctx); 
 	}
 
-	@Override public List<Node> visitAttribute(XQueryParser.AttributeContext ctx) { 
+	@Override public ArrayList<Node> visitAttribute(XQueryParser.AttributeContext ctx) { 
 		return visitChildren(ctx); 
 	}
 
-	@Override public List<Node> visitRpChildren(XQueryParser.RpChildrenContext ctx) { 
+	@Override public ArrayList<Node> visitRpChildren(XQueryParser.RpChildrenContext ctx) { 
 		return visitChildren(ctx); 
 	}
 
-	@Override public List<Node> visitRpParentheses(XQueryParser.RpParenthesesContext ctx) { 
+	@Override public ArrayList<Node> visitRpParentheses(XQueryParser.RpParenthesesContext ctx) { 
 		return visitChildren(ctx); 
 	}
 
-	@Override public List<Node> visitText(XQueryParser.TextContext ctx) { 
+	@Override public ArrayList<Node> visitText(XQueryParser.TextContext ctx) { 
 		return visitChildren(ctx); 
 	}
 
-	@Override public List<Node> visitChildren(XQueryParser.ChildrenContext ctx) { 
+	@Override public ArrayList<Node> visitChildren(XQueryParser.ChildrenContext ctx) { 
 		return visitChildren(ctx); 
 	}
 
-	@Override public List<Node> visitRpConcat(XQueryParser.RpConcatContext ctx) { 
+	@Override public ArrayList<Node> visitRpConcat(XQueryParser.RpConcatContext ctx) { 
 		return visitChildren(ctx); 
 	}
 
-	@Override public List<Node> visitCurrent(XQueryParser.CurrentContext ctx) { 
+	@Override public ArrayList<Node> visitCurrent(XQueryParser.CurrentContext ctx) { 
 		return visitChildren(ctx); 
 	}
 
-	@Override public List<Node> visitRpDescendants(XQueryParser.RpDescendantsContext ctx) { 
+	@Override public ArrayList<Node> visitRpDescendants(XQueryParser.RpDescendantsContext ctx) { 
 		return visitChildren(ctx); 
 	}
 
-	@Override public List<Node> visitRpFilter(XQueryParser.RpFilterContext ctx) { 
+	@Override public ArrayList<Node> visitRpFilter(XQueryParser.RpFilterContext ctx) { 
 		return visitChildren(ctx); 
 	}
 
-	@Override public List<Node> visitFilterEqual(XQueryParser.FilterEqualContext ctx) { 
+	@Override public ArrayList<Node> visitFilterEqual(XQueryParser.FilterEqualContext ctx) { 
 		return visitChildren(ctx); 
 	}
 
-	@Override public List<Node> visitFilterNot(XQueryParser.FilterNotContext ctx) { 
+	@Override public ArrayList<Node> visitFilterNot(XQueryParser.FilterNotContext ctx) { 
 		return visitChildren(ctx); 
 	}
 
-	@Override public List<Node> visitFilterOr(XQueryParser.FilterOrContext ctx) { 
+	@Override public ArrayList<Node> visitFilterOr(XQueryParser.FilterOrContext ctx) { 
 		return visitChildren(ctx); 
 	}
 
-	@Override public List<Node> visitFilterAnd(XQueryParser.FilterAndContext ctx) { 
+	@Override public ArrayList<Node> visitFilterAnd(XQueryParser.FilterAndContext ctx) { 
 		return visitChildren(ctx); 
 	}
 
-	@Override public List<Node> visitFilterRp(XQueryParser.FilterRpContext ctx) { 
+	@Override public ArrayList<Node> visitFilterRp(XQueryParser.FilterRpContext ctx) { 
 		return visitChildren(ctx); 
 	}
 
-	@Override public List<Node> visitFilterParentheses(XQueryParser.FilterParenthesesContext ctx) { 
+	@Override public ArrayList<Node> visitFilterParentheses(XQueryParser.FilterParenthesesContext ctx) { 
 		return visitChildren(ctx); 
 	}
 
-	@Override public List<Node> visitFilterIs(XQueryParser.FilterIsContext ctx) { 
+	@Override public ArrayList<Node> visitFilterIs(XQueryParser.FilterIsContext ctx) { 
 		return visitChildren(ctx); 
 	}
 }
