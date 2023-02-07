@@ -1,8 +1,14 @@
 package cse232b.visitor;
 
 //java package
+import java.io.File;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 //antlr4 package
 import cse232b.parsers.XQueryBaseVisitor;
@@ -72,7 +78,43 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 	// open doc file, first function of each query, todo
 	@Override
 	public ArrayList<Node> visitDocFile(XQueryParser.DocFileContext ctx) {
-		return visitChildren(ctx);
+		ArrayList<Node> result = new ArrayList<>();
+		String fileName = ctx.fname().getText();
+		System.out.println(fileName);
+		// read file from resource folder
+		File fileDOM = null;
+//		ClassLoader classLoader = getClass().getClassLoader();
+//		try {
+//			URL targetURL = classLoader.getResource(fileName);
+//			// file not exist
+//			if (targetURL == null) {
+//				throw new IllegalArgumentException(fileName + "not found!");
+//			}
+//			fileDOM = new File(targetURL.toURI());
+//		} catch (Exception e) {
+//			// TODO: handle exception
+//			System.out.println("file not found!");
+//			System.exit(1);
+//		}
+		String resource = "src/main/resources";
+        fileDOM = Paths.get(resource, fileName).toAbsolutePath().toFile();
+        System.out.println(fileDOM);
+		// convert file into DOM node
+		try {
+			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+//			documentBuilderFactory.setIgnoringElementContentWhitespace(true);
+			DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+			Document document = documentBuilder.parse(fileDOM);
+			// add doc node
+			result.add(document);
+			curNodes = result;
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println(e);
+			System.exit(1);
+		}
+		System.out.println("file open!");
+		return result;
 	}
 
 	// nothing to do
@@ -146,7 +188,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 	// rp1 / rp2
 	@Override
 	public ArrayList<Node> visitRpChildren(XQueryParser.RpChildrenContext ctx) {
-		ArrayList<Node> result = new ArrayList<>();
+		ArrayList<Node> result = null;
 		visit(ctx.rp(0));
 		result = visit(ctx.rp(1));
 		curNodes = result;
@@ -156,7 +198,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 	// rp1 // rp2
 	@Override
 	public ArrayList<Node> visitRpAllDescendants(XQueryParser.RpAllDescendantsContext ctx) {
-		ArrayList<Node> result = new ArrayList<>();
+		ArrayList<Node> result = null;
 		visit(ctx.rp(0));
 		curNodes = visitNodeListDescendants(curNodes);
 		result = visit(ctx.rp(1));
@@ -260,7 +302,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 	// filter1 or filter2
 	@Override
 	public ArrayList<Node> visitFilterOr(XQueryParser.FilterOrContext ctx) {
-		ArrayList<Node> result = new ArrayList<>();
+		ArrayList<Node> result = null;
 		ArrayList<Node> curNodesCopy = new ArrayList<>(curNodes);
 		result = visit(ctx.filter(0));
 		curNodes = curNodesCopy;
