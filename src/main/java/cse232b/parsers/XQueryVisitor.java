@@ -35,7 +35,7 @@ public interface XQueryVisitor<T> extends ParseTreeVisitor<T> {
 	T visitDocFile(XQueryParser.DocFileContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code FileName}
-	 * labeled alternative in {@link XQueryParser#filename}.
+	 * labeled alternative in {@link XQueryParser#fname}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */

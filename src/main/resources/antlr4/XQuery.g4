@@ -15,10 +15,10 @@ ap          : doc '/' rp                        # ApChildren
             | doc '//' rp                       # ApAllDescendants
             ;
 //document
-doc         : 'doc' '("' filename '")'             # DocFile
+doc         : 'doc' '("' fname '")'             # DocFile
             ;
 //file name
-filename       : WORD ('.' WORD)*                  # FileName
+fname       : WORD ('.' WORD)*                  # FileName
             ;
 //relative path
 rp          : WORD                              # TagName

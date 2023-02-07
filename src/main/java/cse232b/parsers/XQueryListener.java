@@ -47,13 +47,13 @@ public interface XQueryListener extends ParseTreeListener {
 	void exitDocFile(XQueryParser.DocFileContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code FileName}
-	 * labeled alternative in {@link XQueryParser#filename}.
+	 * labeled alternative in {@link XQueryParser#fname}.
 	 * @param ctx the parse tree
 	 */
 	void enterFileName(XQueryParser.FileNameContext ctx);
 	/**
 	 * Exit a parse tree produced by the {@code FileName}
-	 * labeled alternative in {@link XQueryParser#filename}.
+	 * labeled alternative in {@link XQueryParser#fname}.
 	 * @param ctx the parse tree
 	 */
 	void exitFileName(XQueryParser.FileNameContext ctx);

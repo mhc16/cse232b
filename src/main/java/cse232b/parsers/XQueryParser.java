@@ -23,10 +23,10 @@ public class XQueryParser extends Parser {
 		T__9=10, T__10=11, T__11=12, T__12=13, T__13=14, T__14=15, T__15=16, T__16=17, 
 		T__17=18, T__18=19, T__19=20, T__20=21, T__21=22, WORD=23, WS=24, StringConstant=25;
 	public static final int
-		RULE_ap = 0, RULE_doc = 1, RULE_filename = 2, RULE_rp = 3, RULE_filter = 4;
+		RULE_ap = 0, RULE_doc = 1, RULE_fname = 2, RULE_rp = 3, RULE_filter = 4;
 	private static String[] makeRuleNames() {
 		return new String[] {
-			"ap", "doc", "filename", "rp", "filter"
+			"ap", "doc", "fname", "rp", "filter"
 		};
 	}
 	public static final String[] ruleNames = makeRuleNames();
@@ -209,8 +209,8 @@ public class XQueryParser extends Parser {
 		}
 	}
 	public static class DocFileContext extends DocContext {
-		public FilenameContext filename() {
-			return getRuleContext(FilenameContext.class,0);
+		public FnameContext fname() {
+			return getRuleContext(FnameContext.class,0);
 		}
 		public DocFileContext(DocContext ctx) { copyFrom(ctx); }
 		@Override
@@ -240,7 +240,7 @@ public class XQueryParser extends Parser {
 			setState(21);
 			match(T__3);
 			setState(22);
-			filename();
+			fname();
 			setState(23);
 			match(T__4);
 			}
@@ -256,23 +256,23 @@ public class XQueryParser extends Parser {
 		return _localctx;
 	}
 
-	public static class FilenameContext extends ParserRuleContext {
-		public FilenameContext(ParserRuleContext parent, int invokingState) {
+	public static class FnameContext extends ParserRuleContext {
+		public FnameContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_filename; }
+		@Override public int getRuleIndex() { return RULE_fname; }
 	 
-		public FilenameContext() { }
-		public void copyFrom(FilenameContext ctx) {
+		public FnameContext() { }
+		public void copyFrom(FnameContext ctx) {
 			super.copyFrom(ctx);
 		}
 	}
-	public static class FileNameContext extends FilenameContext {
+	public static class FileNameContext extends FnameContext {
 		public List<TerminalNode> WORD() { return getTokens(XQueryParser.WORD); }
 		public TerminalNode WORD(int i) {
 			return getToken(XQueryParser.WORD, i);
 		}
-		public FileNameContext(FilenameContext ctx) { copyFrom(ctx); }
+		public FileNameContext(FnameContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if ( listener instanceof XQueryListener ) ((XQueryListener)listener).enterFileName(this);
@@ -288,9 +288,9 @@ public class XQueryParser extends Parser {
 		}
 	}
 
-	public final FilenameContext filename() throws RecognitionException {
-		FilenameContext _localctx = new FilenameContext(_ctx, getState());
-		enterRule(_localctx, 4, RULE_filename);
+	public final FnameContext fname() throws RecognitionException {
+		FnameContext _localctx = new FnameContext(_ctx, getState());
+		enterRule(_localctx, 4, RULE_fname);
 		int _la;
 		try {
 			_localctx = new FileNameContext(_localctx);
