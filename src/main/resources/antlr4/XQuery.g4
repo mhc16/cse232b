@@ -1,6 +1,12 @@
 grammar XQuery;
 
+@header {
+package cse232b.parsers;
+}
 // parser rule
+//xp			: ap
+//			| rp
+//			;
 // absolute path
 ap          : doc '/' rp                        # ApChildren
             | doc '//' rp                       # ApDescendants
