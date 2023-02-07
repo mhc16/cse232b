@@ -20,26 +20,40 @@ public interface XQueryVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitApChildren(XQueryParser.ApChildrenContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code ApDescendants}
+	 * Visit a parse tree produced by the {@code ApAllDescendants}
 	 * labeled alternative in {@link XQueryParser#ap}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitApDescendants(XQueryParser.ApDescendantsContext ctx);
+	T visitApAllDescendants(XQueryParser.ApAllDescendantsContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code XmlDoc}
+	 * Visit a parse tree produced by the {@code DocFile}
 	 * labeled alternative in {@link XQueryParser#doc}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitXmlDoc(XQueryParser.XmlDocContext ctx);
+	T visitDocFile(XQueryParser.DocFileContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code FileName}
-	 * labeled alternative in {@link XQueryParser#fname}.
+	 * labeled alternative in {@link XQueryParser#filename}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitFileName(XQueryParser.FileNameContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code AttrName}
+	 * labeled alternative in {@link XQueryParser#rp}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAttrName(XQueryParser.AttrNameContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Txt}
+	 * labeled alternative in {@link XQueryParser#rp}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTxt(XQueryParser.TxtContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code TagName}
 	 * labeled alternative in {@link XQueryParser#rp}.
@@ -55,13 +69,6 @@ public interface XQueryVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitParent(XQueryParser.ParentContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code Attribute}
-	 * labeled alternative in {@link XQueryParser#rp}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAttribute(XQueryParser.AttributeContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code RpChildren}
 	 * labeled alternative in {@link XQueryParser#rp}.
 	 * @param ctx the parse tree
@@ -69,19 +76,12 @@ public interface XQueryVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitRpChildren(XQueryParser.RpChildrenContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code RpParentheses}
+	 * Visit a parse tree produced by the {@code RpAllDescendants}
 	 * labeled alternative in {@link XQueryParser#rp}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRpParentheses(XQueryParser.RpParenthesesContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code Text}
-	 * labeled alternative in {@link XQueryParser#rp}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitText(XQueryParser.TextContext ctx);
+	T visitRpAllDescendants(XQueryParser.RpAllDescendantsContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code Children}
 	 * labeled alternative in {@link XQueryParser#rp}.
@@ -90,6 +90,13 @@ public interface XQueryVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitChildren(XQueryParser.ChildrenContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code Self}
+	 * labeled alternative in {@link XQueryParser#rp}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSelf(XQueryParser.SelfContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code RpConcat}
 	 * labeled alternative in {@link XQueryParser#rp}.
 	 * @param ctx the parse tree
@@ -97,26 +104,19 @@ public interface XQueryVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitRpConcat(XQueryParser.RpConcatContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code Current}
-	 * labeled alternative in {@link XQueryParser#rp}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCurrent(XQueryParser.CurrentContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code RpDescendants}
-	 * labeled alternative in {@link XQueryParser#rp}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitRpDescendants(XQueryParser.RpDescendantsContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code RpFilter}
 	 * labeled alternative in {@link XQueryParser#rp}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitRpFilter(XQueryParser.RpFilterContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code RpBrackets}
+	 * labeled alternative in {@link XQueryParser#rp}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRpBrackets(XQueryParser.RpBracketsContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code FilterEqual}
 	 * labeled alternative in {@link XQueryParser#filter}.
@@ -131,6 +131,13 @@ public interface XQueryVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitFilterNot(XQueryParser.FilterNotContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code FilterBrackets}
+	 * labeled alternative in {@link XQueryParser#filter}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFilterBrackets(XQueryParser.FilterBracketsContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code FilterOr}
 	 * labeled alternative in {@link XQueryParser#filter}.
@@ -153,17 +160,17 @@ public interface XQueryVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFilterRp(XQueryParser.FilterRpContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code FilterParentheses}
-	 * labeled alternative in {@link XQueryParser#filter}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFilterParentheses(XQueryParser.FilterParenthesesContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code FilterIs}
 	 * labeled alternative in {@link XQueryParser#filter}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitFilterIs(XQueryParser.FilterIsContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code FilterString}
+	 * labeled alternative in {@link XQueryParser#filter}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFilterString(XQueryParser.FilterStringContext ctx);
 }

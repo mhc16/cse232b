@@ -3,30 +3,33 @@ grammar XQuery;
 @header {
 package cse232b.parsers;
 }
+
+//lexer rule
+WORD                : [a-zA-Z0-9_-]+;
+WS                  : [ \t\r\n]+ -> skip;
+StringConstant      : '"'[a-zA-Z0-9_ ,.!?;'"-]+'"';
+
 // parser rule
-//xp			: ap
-//			| rp
-//			;
 // absolute path
 ap          : doc '/' rp                        # ApChildren
-            | doc '//' rp                       # ApDescendants
+            | doc '//' rp                       # ApAllDescendants
             ;
 //document
-doc         : 'doc' '("' fname '")'             # XmlDoc
+doc         : 'doc' '("' filename '")'             # DocFile
             ;
 //file name
-fname       : WORD ('.' WORD)*                  # FileName
+filename       : WORD ('.' WORD)*                  # FileName
             ;
 //relative path
 rp          : WORD                              # TagName
             | '*'                               # Children
-            | '.'                               # Current
+            | '.'                               # Self
             | '..'                              # Parent
-            | 'text()'                          # Text
-            | '@' WORD                          # Attribute
-            | '(' rp ')'                        # RpParentheses
+            | 'text()'                          # Txt
+            | '@' WORD                          # AttrName
+            | '(' rp ')'                        # RpBrackets
             | rp '/' rp                         # RpChildren
-            | rp '//' rp                        # RpDescendants
+            | rp '//' rp                        # RpAllDescendants
             | rp '[' filter ']'                 # RpFilter
             | rp ',' rp                         # RpConcat
             ;
@@ -36,13 +39,9 @@ filter      : rp                                # FilterRp
             | rp 'eq' rp                        # FilterEqual
             | rp '==' rp                        # FilterIs
             | rp 'is' rp                        # FilterIs
-            | rp '=' StringConstant				# FilterEqual
-            | '(' filter ')'                    # FilterParentheses
+            | rp '=' StringConstant				# FilterString
+            | '(' filter ')'                    # FilterBrackets
             | filter 'and' filter               # FilterAnd
             | filter 'or' filter                # FilterOr
             | 'not' filter                      # FilterNot
             ;
-//lexer rule
-WORD                : [a-zA-Z0-9_-]+;
-WS                  : [ \t\r\n]+ -> skip;
-StringConstant      : '"'[a-zA-Z0-9_ ,.!?;'"-]+'"';

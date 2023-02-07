@@ -22,41 +22,65 @@ public interface XQueryListener extends ParseTreeListener {
 	 */
 	void exitApChildren(XQueryParser.ApChildrenContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code ApDescendants}
+	 * Enter a parse tree produced by the {@code ApAllDescendants}
 	 * labeled alternative in {@link XQueryParser#ap}.
 	 * @param ctx the parse tree
 	 */
-	void enterApDescendants(XQueryParser.ApDescendantsContext ctx);
+	void enterApAllDescendants(XQueryParser.ApAllDescendantsContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code ApDescendants}
+	 * Exit a parse tree produced by the {@code ApAllDescendants}
 	 * labeled alternative in {@link XQueryParser#ap}.
 	 * @param ctx the parse tree
 	 */
-	void exitApDescendants(XQueryParser.ApDescendantsContext ctx);
+	void exitApAllDescendants(XQueryParser.ApAllDescendantsContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code XmlDoc}
+	 * Enter a parse tree produced by the {@code DocFile}
 	 * labeled alternative in {@link XQueryParser#doc}.
 	 * @param ctx the parse tree
 	 */
-	void enterXmlDoc(XQueryParser.XmlDocContext ctx);
+	void enterDocFile(XQueryParser.DocFileContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code XmlDoc}
+	 * Exit a parse tree produced by the {@code DocFile}
 	 * labeled alternative in {@link XQueryParser#doc}.
 	 * @param ctx the parse tree
 	 */
-	void exitXmlDoc(XQueryParser.XmlDocContext ctx);
+	void exitDocFile(XQueryParser.DocFileContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code FileName}
-	 * labeled alternative in {@link XQueryParser#fname}.
+	 * labeled alternative in {@link XQueryParser#filename}.
 	 * @param ctx the parse tree
 	 */
 	void enterFileName(XQueryParser.FileNameContext ctx);
 	/**
 	 * Exit a parse tree produced by the {@code FileName}
-	 * labeled alternative in {@link XQueryParser#fname}.
+	 * labeled alternative in {@link XQueryParser#filename}.
 	 * @param ctx the parse tree
 	 */
 	void exitFileName(XQueryParser.FileNameContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code AttrName}
+	 * labeled alternative in {@link XQueryParser#rp}.
+	 * @param ctx the parse tree
+	 */
+	void enterAttrName(XQueryParser.AttrNameContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code AttrName}
+	 * labeled alternative in {@link XQueryParser#rp}.
+	 * @param ctx the parse tree
+	 */
+	void exitAttrName(XQueryParser.AttrNameContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Txt}
+	 * labeled alternative in {@link XQueryParser#rp}.
+	 * @param ctx the parse tree
+	 */
+	void enterTxt(XQueryParser.TxtContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Txt}
+	 * labeled alternative in {@link XQueryParser#rp}.
+	 * @param ctx the parse tree
+	 */
+	void exitTxt(XQueryParser.TxtContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code TagName}
 	 * labeled alternative in {@link XQueryParser#rp}.
@@ -82,18 +106,6 @@ public interface XQueryListener extends ParseTreeListener {
 	 */
 	void exitParent(XQueryParser.ParentContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code Attribute}
-	 * labeled alternative in {@link XQueryParser#rp}.
-	 * @param ctx the parse tree
-	 */
-	void enterAttribute(XQueryParser.AttributeContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code Attribute}
-	 * labeled alternative in {@link XQueryParser#rp}.
-	 * @param ctx the parse tree
-	 */
-	void exitAttribute(XQueryParser.AttributeContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code RpChildren}
 	 * labeled alternative in {@link XQueryParser#rp}.
 	 * @param ctx the parse tree
@@ -106,29 +118,17 @@ public interface XQueryListener extends ParseTreeListener {
 	 */
 	void exitRpChildren(XQueryParser.RpChildrenContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code RpParentheses}
+	 * Enter a parse tree produced by the {@code RpAllDescendants}
 	 * labeled alternative in {@link XQueryParser#rp}.
 	 * @param ctx the parse tree
 	 */
-	void enterRpParentheses(XQueryParser.RpParenthesesContext ctx);
+	void enterRpAllDescendants(XQueryParser.RpAllDescendantsContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code RpParentheses}
+	 * Exit a parse tree produced by the {@code RpAllDescendants}
 	 * labeled alternative in {@link XQueryParser#rp}.
 	 * @param ctx the parse tree
 	 */
-	void exitRpParentheses(XQueryParser.RpParenthesesContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code Text}
-	 * labeled alternative in {@link XQueryParser#rp}.
-	 * @param ctx the parse tree
-	 */
-	void enterText(XQueryParser.TextContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code Text}
-	 * labeled alternative in {@link XQueryParser#rp}.
-	 * @param ctx the parse tree
-	 */
-	void exitText(XQueryParser.TextContext ctx);
+	void exitRpAllDescendants(XQueryParser.RpAllDescendantsContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code Children}
 	 * labeled alternative in {@link XQueryParser#rp}.
@@ -142,6 +142,18 @@ public interface XQueryListener extends ParseTreeListener {
 	 */
 	void exitChildren(XQueryParser.ChildrenContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code Self}
+	 * labeled alternative in {@link XQueryParser#rp}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelf(XQueryParser.SelfContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Self}
+	 * labeled alternative in {@link XQueryParser#rp}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelf(XQueryParser.SelfContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code RpConcat}
 	 * labeled alternative in {@link XQueryParser#rp}.
 	 * @param ctx the parse tree
@@ -154,30 +166,6 @@ public interface XQueryListener extends ParseTreeListener {
 	 */
 	void exitRpConcat(XQueryParser.RpConcatContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code Current}
-	 * labeled alternative in {@link XQueryParser#rp}.
-	 * @param ctx the parse tree
-	 */
-	void enterCurrent(XQueryParser.CurrentContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code Current}
-	 * labeled alternative in {@link XQueryParser#rp}.
-	 * @param ctx the parse tree
-	 */
-	void exitCurrent(XQueryParser.CurrentContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code RpDescendants}
-	 * labeled alternative in {@link XQueryParser#rp}.
-	 * @param ctx the parse tree
-	 */
-	void enterRpDescendants(XQueryParser.RpDescendantsContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code RpDescendants}
-	 * labeled alternative in {@link XQueryParser#rp}.
-	 * @param ctx the parse tree
-	 */
-	void exitRpDescendants(XQueryParser.RpDescendantsContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code RpFilter}
 	 * labeled alternative in {@link XQueryParser#rp}.
 	 * @param ctx the parse tree
@@ -189,6 +177,18 @@ public interface XQueryListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitRpFilter(XQueryParser.RpFilterContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code RpBrackets}
+	 * labeled alternative in {@link XQueryParser#rp}.
+	 * @param ctx the parse tree
+	 */
+	void enterRpBrackets(XQueryParser.RpBracketsContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code RpBrackets}
+	 * labeled alternative in {@link XQueryParser#rp}.
+	 * @param ctx the parse tree
+	 */
+	void exitRpBrackets(XQueryParser.RpBracketsContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code FilterEqual}
 	 * labeled alternative in {@link XQueryParser#filter}.
@@ -213,6 +213,18 @@ public interface XQueryListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitFilterNot(XQueryParser.FilterNotContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code FilterBrackets}
+	 * labeled alternative in {@link XQueryParser#filter}.
+	 * @param ctx the parse tree
+	 */
+	void enterFilterBrackets(XQueryParser.FilterBracketsContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code FilterBrackets}
+	 * labeled alternative in {@link XQueryParser#filter}.
+	 * @param ctx the parse tree
+	 */
+	void exitFilterBrackets(XQueryParser.FilterBracketsContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code FilterOr}
 	 * labeled alternative in {@link XQueryParser#filter}.
@@ -250,18 +262,6 @@ public interface XQueryListener extends ParseTreeListener {
 	 */
 	void exitFilterRp(XQueryParser.FilterRpContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code FilterParentheses}
-	 * labeled alternative in {@link XQueryParser#filter}.
-	 * @param ctx the parse tree
-	 */
-	void enterFilterParentheses(XQueryParser.FilterParenthesesContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code FilterParentheses}
-	 * labeled alternative in {@link XQueryParser#filter}.
-	 * @param ctx the parse tree
-	 */
-	void exitFilterParentheses(XQueryParser.FilterParenthesesContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code FilterIs}
 	 * labeled alternative in {@link XQueryParser#filter}.
 	 * @param ctx the parse tree
@@ -273,4 +273,16 @@ public interface XQueryListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitFilterIs(XQueryParser.FilterIsContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code FilterString}
+	 * labeled alternative in {@link XQueryParser#filter}.
+	 * @param ctx the parse tree
+	 */
+	void enterFilterString(XQueryParser.FilterStringContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code FilterString}
+	 * labeled alternative in {@link XQueryParser#filter}.
+	 * @param ctx the parse tree
+	 */
+	void exitFilterString(XQueryParser.FilterStringContext ctx);
 }
