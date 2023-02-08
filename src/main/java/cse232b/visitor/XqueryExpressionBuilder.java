@@ -2,8 +2,6 @@ package cse232b.visitor;
 
 //java package
 import java.io.File;
-import java.net.URL;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -83,19 +81,19 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 		ArrayList<Node> result = new ArrayList<>();
 		String fileName = ctx.fname().getText();
 		// read file from resource folder
-		File fileDOM = null;
-		ClassLoader classLoader = getClass().getClassLoader();
-		try {
-			URL targetURL = classLoader.getResource(fileName);
-			// file not exist
-			if (targetURL == null) {
-				throw new IllegalArgumentException(fileName + "not found!");
-			}
-			fileDOM = new File(targetURL.toURI());
-		} catch (Exception e) {
-			System.out.println("file not found!");
-			System.exit(1);
-		}
+		File fileDOM = new File(fileName);
+//		ClassLoader classLoader = getClass().getClassLoader();
+//		try {
+//			URL targetURL = classLoader.getResource(fileName);
+//			// file not exist
+//			if (targetURL == null) {
+//				throw new IllegalArgumentException(fileName + "not found!");
+//			}
+//			fileDOM = new File(targetURL.toURI());
+//		} catch (Exception e) {
+//			System.out.println("file not found!");
+//			System.exit(1);
+//		}
 		try {
 			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 			documentBuilderFactory.setIgnoringElementContentWhitespace(true);
@@ -367,7 +365,8 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 		String require = ctx.StringConstant().getText();
 		curNodes = visit(ctx.rp());
 		for (Node node : curNodes) {
-			if (node.getTextContent().equals(require)) {
+			if ((node.getNodeType() == Node.TEXT_NODE || node.getNodeType() == Node.ATTRIBUTE_NODE)
+					&& node.getTextContent().equals(require)) {
 				result.add(node);
 			}
 		}
