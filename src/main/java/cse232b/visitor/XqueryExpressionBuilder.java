@@ -363,6 +363,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 	public ArrayList<Node> visitFilterString(XQueryParser.FilterStringContext ctx) {
 		ArrayList<Node> result = new ArrayList<>();
 		String require = ctx.StringConstant().getText();
+		require = require.substring(1, (require.length()-1));
 		curNodes = visit(ctx.rp());
 		for (Node node : curNodes) {
 			if ((node.getNodeType() == Node.TEXT_NODE || node.getNodeType() == Node.ATTRIBUTE_NODE)

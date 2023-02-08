@@ -61,7 +61,7 @@ public class XqueryProgramBuilder {
 		}
 		Document document = documentBuilder.newDocument();
 		// Add query result to xml object
-		Node xmlResult = document.createElement("Result");
+		Node xmlResult = document.createElement("RESULT");
 		for (Node node : result) {
 			Node nodeCopy = document.importNode(node, true);
 			xmlResult.appendChild(nodeCopy);
