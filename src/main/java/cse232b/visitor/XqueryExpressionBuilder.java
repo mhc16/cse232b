@@ -324,7 +324,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 		ArrayList<Node> fil1NodeList = visit(ctx.filter(0));
 		curNodes = curNodesCopy;
 		ArrayList<Node> fil2NodeList = visit(ctx.filter(1));
-		if (!fil1NodeList.isEmpty() && !fil2NodeList.isEmpty()) {
+		if (!fil1NodeList.isEmpty() && !fil2NodeList.isEmpty()){
 			result.addAll(fil1NodeList);
 			result.addAll(fil2NodeList);
 		}
