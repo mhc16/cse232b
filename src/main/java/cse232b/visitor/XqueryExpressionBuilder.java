@@ -164,6 +164,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 				}
 			}
 		}
+		result = removeDuplicates(result);
 		curNodes = result;
 //		System.out.println("2");
 //		System.out.println(curNodes);
@@ -216,6 +217,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 				}
 			}
 		}
+		result = removeDuplicates(result);
 		curNodes = result;
 		return result;
 	}
