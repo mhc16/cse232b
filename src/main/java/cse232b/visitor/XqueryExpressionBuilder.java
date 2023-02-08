@@ -164,6 +164,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 				}
 			}
 		}
+		result = removeDuplicates(result);
 		curNodes = result;
 //		System.out.println("2");
 //		System.out.println(curNodes);
@@ -199,6 +200,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 		visit(ctx.rp(0));
 		curNodes = visitNodeListDescendants(curNodes);
 		result = visit(ctx.rp(1));
+		result = removeDuplicates(result);
 		curNodes = result;
 		return result;
 	}
@@ -215,6 +217,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 				}
 			}
 		}
+		result = removeDuplicates(result);
 		curNodes = result;
 		return result;
 	}
@@ -243,9 +246,9 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 		ArrayList<Node> result = new ArrayList<>();
 		ArrayList<Node> curNodesCopy = visit(ctx.rp());
 		for (Node node : curNodesCopy) {
-			ArrayList<Node> temp = new ArrayList<>();
-			temp.add(node);
-			curNodes = temp;
+			ArrayList<Node> each = new ArrayList<>();
+			each.add(node);
+			curNodes = each;
 			// filter condition
 			if (!visit(ctx.filter()).isEmpty()) {
 				result.add(node);
@@ -280,11 +283,11 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 		return result;
 	}
 
-	// not filter, use removeAll
+	// not filter, True if empty else false
 	@Override
 	public ArrayList<Node> visitFilterNot(XQueryParser.FilterNotContext ctx) {
 		ArrayList<Node> result = new ArrayList<>();
-		ArrayList<Node> curNodesCopy = curNodes;
+		ArrayList<Node> curNodesCopy = new ArrayList<>(curNodes);
 		ArrayList<Node> fil1NodeList = visit(ctx.filter());
 		if (fil1NodeList.isEmpty()) {
 			result = curNodesCopy;
@@ -363,7 +366,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 	public ArrayList<Node> visitFilterString(XQueryParser.FilterStringContext ctx) {
 		ArrayList<Node> result = new ArrayList<>();
 		String require = ctx.StringConstant().getText();
-		require = require.substring(1, (require.length()-1));
+		require = require.substring(1, (require.length() - 1));
 		curNodes = visit(ctx.rp());
 		for (Node node : curNodes) {
 			if ((node.getNodeType() == Node.TEXT_NODE || node.getNodeType() == Node.ATTRIBUTE_NODE)
