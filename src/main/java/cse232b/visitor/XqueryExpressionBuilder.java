@@ -82,7 +82,6 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 	public ArrayList<Node> visitDocFile(XQueryParser.DocFileContext ctx) {
 		ArrayList<Node> result = new ArrayList<>();
 		String fileName = ctx.fname().getText();
-		System.out.println(fileName);
 		// read file from resource folder
 		File fileDOM = null;
 		ClassLoader classLoader = getClass().getClassLoader();
@@ -94,7 +93,6 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 			}
 			fileDOM = new File(targetURL.toURI());
 		} catch (Exception e) {
-			// TODO: handle exception
 			System.out.println("file not found!");
 			System.exit(1);
 		}
@@ -107,11 +105,10 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 			result.add(document);
 			curNodes = result;
 		} catch (Exception e) {
-			// TODO: handle exception
 			System.out.println(e);
 			System.exit(1);
 		}
-		System.out.println("file open!");
+		// System.out.println("file open!");
 		return result;
 	}
 
@@ -250,7 +247,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 		for (Node node : curNodesCopy) {
 			ArrayList<Node> temp = new ArrayList<>();
 			temp.add(node);
-			curNodesCopy = temp;
+			curNodes = temp;
 			// filter condition
 			if (!visit(ctx.filter()).isEmpty()) {
 				result.add(node);
@@ -288,11 +285,14 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 	// not filter, use removeAll
 	@Override
 	public ArrayList<Node> visitFilterNot(XQueryParser.FilterNotContext ctx) {
-		ArrayList<Node> curNodesCopy = new ArrayList<>(curNodes);
-		ArrayList<Node> removeNodeList = visit(ctx.filter());
-		curNodesCopy.removeAll(removeNodeList);
-		curNodes = curNodesCopy;
-		return curNodesCopy;
+		ArrayList<Node> result = new ArrayList<>();
+		ArrayList<Node> curNodesCopy = curNodes;
+		ArrayList<Node> fil1NodeList = visit(ctx.filter());
+		if (fil1NodeList.isEmpty()) {
+			result = curNodesCopy;
+			curNodes = curNodesCopy;
+		}
+		return result;
 	}
 
 	// ( filter )
@@ -304,11 +304,15 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 	// filter1 or filter2
 	@Override
 	public ArrayList<Node> visitFilterOr(XQueryParser.FilterOrContext ctx) {
-		ArrayList<Node> result = null;
+		ArrayList<Node> result = new ArrayList<>();
 		ArrayList<Node> curNodesCopy = new ArrayList<>(curNodes);
-		result = visit(ctx.filter(0));
+		ArrayList<Node> fil1NodeList = visit(ctx.filter(0));
 		curNodes = curNodesCopy;
-		result.addAll(visit(ctx.filter(1)));
+		ArrayList<Node> fil2NodeList = visit(ctx.filter(1));
+		if (!fil1NodeList.isEmpty() || !fil2NodeList.isEmpty()) {
+			result.addAll(fil1NodeList);
+			result.addAll(fil2NodeList);
+		}
 		result = removeDuplicates(result);
 		curNodes = result;
 		return result;
@@ -322,10 +326,9 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 		ArrayList<Node> fil1NodeList = visit(ctx.filter(0));
 		curNodes = curNodesCopy;
 		ArrayList<Node> fil2NodeList = visit(ctx.filter(1));
-		for (Node node1 : fil1NodeList) {
-			if (fil2NodeList.contains(node1)) {
-				result.add(node1);
-			}
+		if (!fil1NodeList.isEmpty() && !fil2NodeList.isEmpty()) {
+			result.addAll(fil1NodeList);
+			result.addAll(fil2NodeList);
 		}
 		result = removeDuplicates(result);
 		curNodes = result;
