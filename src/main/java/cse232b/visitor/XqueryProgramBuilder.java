@@ -3,7 +3,6 @@ package cse232b.visitor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.stream.Stream;
 // xml
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -90,15 +89,15 @@ public class XqueryProgramBuilder {
 		// build engine
 		// System.out.println("test");
 		// input arguments' length should be 2
-//		if (args.length != 2) {
-//			System.out.println("Input argument number should be 2!");
-//			System.exit(1);
-//		}
-//		String inputFile = args[0];
-//		String outputFile = args[1];
+		if (args.length != 2) {
+			System.out.println("Input argument number should be 2!");
+			System.exit(1);
+		}
+		String inputFile = args[0];
+		String outputFile = args[1];
 		// Parse Input Query, retrieve results
-		ArrayList<Node> result = retrieveXQueryResult("test.txt");
-//		System.out.println(result);
+		ArrayList<Node> result = retrieveXQueryResult(inputFile);
+		// System.out.println(result);
 		// Generate output xml object
 		Document document = xmlDocumentGenerator(result);
 		// Generate output xml file
@@ -107,7 +106,7 @@ public class XqueryProgramBuilder {
 		// Build output stream
 		FileOutputStream xmlFileOutputStream = null;
 		try {
-			xmlFileOutputStream = new FileOutputStream("result.xml");
+			xmlFileOutputStream = new FileOutputStream(outputFile);
 		} catch (Exception e) {
 			System.out.println("Output stream failed!");
 			System.exit(1);

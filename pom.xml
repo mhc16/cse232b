@@ -19,13 +19,19 @@
   </dependencies>
   
   <build>
-      <finalName>CSE232B</finalName>
+      <finalName>cse232b_milestone1</finalName>
       <plugins>
           <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-compiler-plugin</artifactId>
               <version>3.2</version>
-              <configuration>
+              <configuration>       
+                  <archive>
+	                  <manifest>
+	                  	<addClasspath>true</addClasspath>
+	                  	<mainClass>cse232b.visitor.XqueryProgramBuilder</mainClass>
+	                  </manifest>
+                  </archive>
                   <source>${jdk.version}</source>
                   <target>${jdk.version}</target>
               </configuration>
