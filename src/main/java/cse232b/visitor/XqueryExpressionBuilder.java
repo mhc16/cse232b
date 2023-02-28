@@ -71,7 +71,69 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 		return removeDuplicates(result);
 	}
 
+	// help function for XqFLWR function
+	private void subVisitFLWR(int k, XQueryParser.XqFLWRContext ctx, ArrayList<Node> res) {
+		// for clause part
+		if (k < ctx.forClause().var().size()) {
+			String varname = ctx.forClause().var(k).getText();
+			ArrayList<Node> values = visit(ctx.forClause().xq(k));
+
+			for (Node item : values) {
+				ArrayList<Node> temp = new ArrayList<>();
+				// backup
+				HashMap<String, ArrayList<Node>> mapCopy = new HashMap<>(VarsMap);
+				temp.add(item);
+				VarsMap.put(varname, temp);
+				subVisitFLWR(k + 1, ctx, res);
+				// restore
+				VarsMap = mapCopy;
+			}
+		} else {
+			// let clause part if exist
+			if (ctx.letClause() != null) {
+				visit(ctx.letClause());
+			}
+			// where clause part if exist
+			if (ctx.whereClause() != null) {
+				if (visit(ctx.whereClause()).isEmpty()) {
+					return;
+				}
+			}
+			// add all results
+			res.addAll(visit(ctx.returnClause()));
+		}
+	}
+
+	// help function for cond some function
+	private boolean condSomeHelper(XQueryParser.CondSomeContext ctx, int index) {
+		// end of var, judge condition, if not empty then true
+		if (index == ctx.var().size()) {
+			return !visit(ctx.cond()).isEmpty();
+		}
+		// not the end of var
+		else {
+			String var = ctx.var(index).getText();
+			ArrayList<Node> xqList = visit(ctx.xq(index));
+			// iterate variable in Xq value (for)
+			// need to restore context for each level of variable
+			HashMap<String, ArrayList<Node>> contextMapBackup = new HashMap<>(VarsMap);
+			for (Node node : xqList) {
+				ArrayList<Node> newValue = new ArrayList<>();
+				newValue.add(node);
+				VarsMap.put(var, newValue);
+				// if one satisfy condition, then return true
+				if (condSomeHelper(ctx, index + 1)) {
+					VarsMap = contextMapBackup;
+					return true;
+				}
+				VarsMap = contextMapBackup;
+			}
+		}
+		return false;
+	}
+
 	// xq methods
+	// return context var value, empty if not exist
 	@Override
 	public ArrayList<Node> visitXqVar(XQueryParser.XqVarContext ctx) {
 		ArrayList<Node> res = new ArrayList<>();
@@ -83,16 +145,18 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 		return res;
 	}
 
+	// StringConstant, implement makeText() function
 	@Override
 	public ArrayList<Node> visitXqString(XQueryParser.XqStringContext ctx) {
 		String temp = ctx.getText();
-		temp = temp.substring(1,temp.length()-1);
+		temp = temp.substring(1, temp.length() - 1);
 		Node tempTxtNode = outFile.createTextNode(temp);
 		ArrayList<Node> res = new ArrayList<>();
 		res.add(tempTxtNode);
 		return res;
 	}
 
+	// xq / rp
 	@Override
 	public ArrayList<Node> visitXqChildren(XQueryParser.XqChildrenContext ctx) {
 		curNodes = visit(ctx.xq());
@@ -101,20 +165,21 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 		return res;
 	}
 
+	// ap
 	@Override
 	public ArrayList<Node> visitXqAp(XQueryParser.XqApContext ctx) {
 		return visit(ctx.ap());
 	}
 
-
-	@Override 
+	// <tag> xq </tag>, implement makeElem() function
+	@Override
 	public ArrayList<Node> visitXqInTag(XQueryParser.XqInTagContext ctx) {
 		ArrayList<Node> temps = visit(ctx.xq());
 		ArrayList<Node> res = new ArrayList<>();
 		Node tempNode = outFile.createElement(ctx.WORD(0).getText());
-		for (Node item:temps){
-			if (item!=null){
-				Node tempChild = outFile.importNode(item,true);
+		for (Node item : temps) {
+			if (item != null) {
+				Node tempChild = outFile.importNode(item, true);
 				tempNode.appendChild(tempChild);
 			}
 		}
@@ -122,6 +187,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 		return res;
 	}
 
+	// xq // rp
 	@Override
 	public ArrayList<Node> visitXqAllDescendants(XQueryParser.XqAllDescendantsContext ctx) {
 		curNodes = visit(ctx.xq());
@@ -132,14 +198,19 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 		return res;
 	}
 
-	@Override public ArrayList<Node> visitXqLetClause(XQueryParser.XqLetClauseContext ctx) {
+	// letClause xq, make adjustment to context
+	@Override
+	public ArrayList<Node> visitXqLetClause(XQueryParser.XqLetClauseContext ctx) {
+		// backup
 		HashMap<String, ArrayList<Node>> mapCopy = new HashMap<>(VarsMap);
 		visit(ctx.letClause());
 		ArrayList<Node> res = visit(ctx.xq());
+		// restore
 		VarsMap = mapCopy;
 		return res;
 	}
 
+	// xq1 , xq2
 	@Override
 	public ArrayList<Node> visitXqConcat(XQueryParser.XqConcatContext ctx) {
 		ArrayList<Node> curNodesCopy = new ArrayList<>(curNodes);
@@ -151,67 +222,55 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 		return result;
 	}
 
-	@Override public ArrayList<Node> visitXqBrackets(XQueryParser.XqBracketsContext ctx) {
+	// ( xq )
+	@Override
+	public ArrayList<Node> visitXqBrackets(XQueryParser.XqBracketsContext ctx) {
 		return visit(ctx.xq());
 	}
-	@Override public ArrayList<Node> visitXqFLWR(XQueryParser.XqFLWRContext ctx) {
+
+	// forClause letClause? whereClause? returnClause
+	@Override
+	public ArrayList<Node> visitXqFLWR(XQueryParser.XqFLWRContext ctx) {
+		// backup context
 		HashMap<String, ArrayList<Node>> mapCopy = new HashMap<>(VarsMap);
 		ArrayList<Node> res = new ArrayList<>();
-		subVisitFLWR(0,ctx,res);
+		// use recursion function
+		subVisitFLWR(0, ctx, res);
+		// restore
 		VarsMap = mapCopy;
 		return res;
 	}
 
-	public void subVisitFLWR(int k,XQueryParser.XqFLWRContext ctx,ArrayList<Node> res){
-		if (k<ctx.forClause().var().size()) {
-			String varname = ctx.forClause().var(k).getText();
-			ArrayList<Node> values = visit(ctx.forClause().xq(k));
-
-			for (Node item : values) {
-				ArrayList<Node> temp = new ArrayList<>();
-				HashMap<String, ArrayList<Node>> mapCopy = new HashMap<>(VarsMap);
-				temp.add(item);
-				VarsMap.put(varname, temp);
-				subVisitFLWR(k + 1, ctx, res);
-				VarsMap = mapCopy;
-			}
-		} else {
-			if (ctx.letClause()!=null){
-				visit(ctx.letClause());
-			}
-			if (ctx.whereClause()!=null){
-				if (visit(ctx.whereClause()).isEmpty()){
-					return;
-				}
-			}
-			res.addAll(visit(ctx.returnClause()));
-		}
-	}
-
-	@Override public ArrayList<Node> visitVar(XQueryParser.VarContext ctx) {
+	// nothing to do
+	@Override
+	public ArrayList<Node> visitVar(XQueryParser.VarContext ctx) {
 		return new ArrayList<>();
 	}
 
-//	@Override public ArrayList<Node> visitForClause(XQueryParser.ForClauseContext ctx) {
-//		return visitChildren(ctx);
-//	}
-	@Override public ArrayList<Node> visitLetClause(XQueryParser.LetClauseContext ctx) {
+	// let var := xq ... , mainly make adjustments to the context
+	@Override
+	public ArrayList<Node> visitLetClause(XQueryParser.LetClauseContext ctx) {
 		int k = ctx.var().size();
-		for (int i=0; i<k; i++){
+		for (int i = 0; i < k; i++) {
 			String varname = ctx.var(i).getText();
-			VarsMap.put(varname,visit(ctx.xq(i)));
+			VarsMap.put(varname, visit(ctx.xq(i)));
 		}
 		return new ArrayList<>();
 	}
-	@Override public ArrayList<Node> visitWhereClause(XQueryParser.WhereClauseContext ctx) {
+
+	// where cond, visit condition
+	@Override
+	public ArrayList<Node> visitWhereClause(XQueryParser.WhereClauseContext ctx) {
 		return visit(ctx.cond());
 	}
 
-	@Override public ArrayList<Node> visitReturnClause(XQueryParser.ReturnClauseContext ctx) {
+	// return xq
+	@Override
+	public ArrayList<Node> visitReturnClause(XQueryParser.ReturnClauseContext ctx) {
 		return visit(ctx.xq());
 	}
 
-
+	// cond1 or cond2
 	@Override
 	public ArrayList<Node> visitCondOr(XQueryParser.CondOrContext ctx) {
 		ArrayList<Node> result = new ArrayList<>();
@@ -259,34 +318,6 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 		}
 		curNodes = curNodesCopy;
 		return result;
-	}
-
-	// help function for cond some
-	private boolean condSomeHelper(XQueryParser.CondSomeContext ctx, int index) {
-		// end of var, judge condition, if not empty then true
-		if (index == ctx.var().size()) {
-			return !visit(ctx.cond()).isEmpty();
-		}
-		// not the end of var
-		else {
-			String var = ctx.var(index).getText();
-			ArrayList<Node> xqList = visit(ctx.xq(index));
-			// iterate variable in Xq value (for)
-			// need to restore context for each level of variable
-			HashMap<String, ArrayList<Node>> contextMapBackup = new HashMap<>(VarsMap);
-			for (Node node : xqList) {
-				ArrayList<Node> newValue = new ArrayList<>();
-				newValue.add(node);
-				VarsMap.put(var, newValue);
-				// if one satisfy condition, then return true
-				if (condSomeHelper(ctx, index + 1)) {
-					VarsMap = contextMapBackup;
-					return true;
-				}
-				VarsMap = contextMapBackup;
-			}
-		}
-		return false;
 	}
 
 	// some var in xq (, var in xq) satisfies cond
@@ -629,7 +660,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 		ArrayList<Node> fil1NodeList = visit(ctx.filter(0));
 		curNodes = curNodesCopy;
 		ArrayList<Node> fil2NodeList = visit(ctx.filter(1));
-		if (!fil1NodeList.isEmpty() && !fil2NodeList.isEmpty()){
+		if (!fil1NodeList.isEmpty() && !fil2NodeList.isEmpty()) {
 			result.addAll(fil1NodeList);
 			result.addAll(fil2NodeList);
 		}
@@ -668,7 +699,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 	public ArrayList<Node> visitFilterString(XQueryParser.FilterStringContext ctx) {
 		ArrayList<Node> result = new ArrayList<>();
 		String require = ctx.StringConstant().getText();
-		require = require.substring(1, (require.length()-1));
+		require = require.substring(1, (require.length() - 1));
 		curNodes = visit(ctx.rp());
 		for (Node node : curNodes) {
 			if ((node.getNodeType() == Node.TEXT_NODE || node.getNodeType() == Node.ATTRIBUTE_NODE)

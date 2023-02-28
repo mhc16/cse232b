@@ -63,13 +63,21 @@ public class XqueryProgramBuilder {
 		}
 		Document document = documentBuilder.newDocument();
 		// Add query result to xml object
-		// not surround by "result"
-		// Node xmlResult = document.createElement("RESULT");
-		for (Node node : result) {
-			Node nodeCopy = document.importNode(node, true);
+		// single node should not surround by "RESULT"
+		if (result.size() == 1) {
+			Node nodeCopy = document.importNode(result.get(0), true);
 			document.appendChild(nodeCopy);
+		} else {
+			// more nodes should surround by "result"
+			Node xmlResult = document.createElement("RESULT");
+			for (Node node : result) {
+				Node nodeCopy = document.importNode(node, true);
+				xmlResult.appendChild(nodeCopy);
+			}
+			document.appendChild(xmlResult);
 		}
-		//document.appendChild(xmlResult);
+
+		// document.appendChild(xmlResult);
 		return document;
 	}
 
