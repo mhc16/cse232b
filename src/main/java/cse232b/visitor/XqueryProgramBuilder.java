@@ -41,7 +41,7 @@ public class XqueryProgramBuilder {
 		XQueryLexer lexer = new XQueryLexer(antlrInputStream);
 		CommonTokenStream tokenStream = new CommonTokenStream(lexer);
 		XQueryParser xQueryParser = new XQueryParser(tokenStream);
-		ParseTree tree = xQueryParser.ap();
+		ParseTree tree = xQueryParser.xq();
 		XqueryExpressionBuilder builder = new XqueryExpressionBuilder();
 		// retrieve results
 		ArrayList<Node> result = builder.visit(tree);
@@ -89,12 +89,12 @@ public class XqueryProgramBuilder {
 		// build engine
 		// System.out.println("test");
 		// input arguments' length should be 2
-		if (args.length != 2) {
-			System.out.println("Input argument number should be 2!");
-			System.exit(1);
-		}
-		String inputFile = args[0];
-		String outputFile = args[1];
+//		if (args.length != 2) {
+//			System.out.println("Input argument number should be 2!");
+//			System.exit(1);
+//		}
+		String inputFile = "text.txt";
+		String outputFile = "outputxq.xml";
 		// Parse Input Query, retrieve results
 		ArrayList<Node> result = retrieveXQueryResult(inputFile);
 		// System.out.println(result);

@@ -23,7 +23,7 @@ import org.w3c.dom.NodeList;
 public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> {
 	// use a nodelist to store the current visit node
 	private ArrayList<Node> curNodes = new ArrayList<Node>();
-	private HashMap<String, List<Node>> VarsMap = new HashMap<>();
+	private HashMap<String, ArrayList<Node>> VarsMap = new HashMap<>();
 	private Document outFile;
 
 	XqueryExpressionBuilder() {
@@ -129,7 +129,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 	}
 
 	@Override public ArrayList<Node> visitXqLetClause(XQueryParser.XqLetClauseContext ctx) {
-		HashMap<String, List<Node>> mapCopy = new HashMap<>(VarsMap);
+		HashMap<String, ArrayList<Node>> mapCopy = new HashMap<>(VarsMap);
 		visit(ctx.letClause());
 		ArrayList<Node> res = visit(ctx.xq());
 		VarsMap = mapCopy;
@@ -151,7 +151,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 		return visit(ctx.xq());
 	}
 	@Override public ArrayList<Node> visitXqFLWR(XQueryParser.XqFLWRContext ctx) {
-		HashMap<String, List<Node>> mapCopy = new HashMap<>(VarsMap);
+		HashMap<String, ArrayList<Node>> mapCopy = new HashMap<>(VarsMap);
 		ArrayList<Node> res = new ArrayList<>();
 		subVisitFLWR(0,ctx,res);
 		VarsMap = mapCopy;
@@ -165,7 +165,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 
 			for (Node item : values) {
 				ArrayList<Node> temp = new ArrayList<>();
-				HashMap<String, List<Node>> mapCopy = new HashMap<>(VarsMap);
+				HashMap<String, ArrayList<Node>> mapCopy = new HashMap<>(VarsMap);
 				temp.add(item);
 				VarsMap.put(varname, temp);
 				subVisitFLWR(k + 1, ctx, res);
@@ -176,7 +176,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 				visit(ctx.letClause());
 			}
 			if (ctx.whereClause()!=null){
-				if (visit(ctx.whereClause())==null){
+				if (visit(ctx.whereClause()).isEmpty()){
 					return;
 				}
 			}
@@ -205,6 +205,154 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 
 	@Override public ArrayList<Node> visitReturnClause(XQueryParser.ReturnClauseContext ctx) {
 		return visit(ctx.xq());
+	}
+
+
+	@Override
+	public ArrayList<Node> visitCondOr(XQueryParser.CondOrContext ctx) {
+		ArrayList<Node> result = new ArrayList<>();
+		ArrayList<Node> curNodesCopy = new ArrayList<>(curNodes);
+		ArrayList<Node> cond1Res = visit(ctx.cond(0));
+		curNodes = curNodesCopy;
+		ArrayList<Node> cond2Res = visit(ctx.cond(1));
+		// if not empty
+		if (!cond1Res.isEmpty() || !cond2Res.isEmpty()) {
+			result.addAll(cond1Res);
+			result.addAll(cond2Res);
+		}
+		result = removeDuplicates(result);
+		curNodes = curNodesCopy;
+
+		return result;
+	}
+
+	// cond1 and cond2
+	@Override
+	public ArrayList<Node> visitCondAnd(XQueryParser.CondAndContext ctx) {
+		ArrayList<Node> result = new ArrayList<>();
+		ArrayList<Node> curNodesCopy = new ArrayList<>(curNodes);
+		ArrayList<Node> cond1Res = visit(ctx.cond(0));
+		curNodes = curNodesCopy;
+		ArrayList<Node> cond2Res = visit(ctx.cond(1));
+		// if not empty
+		if (!cond1Res.isEmpty() && !cond2Res.isEmpty()) {
+			result.addAll(cond1Res);
+			result.addAll(cond2Res);
+		}
+		result = removeDuplicates(result);
+		curNodes = curNodesCopy;
+		return result;
+	}
+
+	// empty ( xq )
+	@Override
+	public ArrayList<Node> visitCondEmpty(XQueryParser.CondEmptyContext ctx) {
+		ArrayList<Node> result = new ArrayList<>();
+		ArrayList<Node> curNodesCopy = new ArrayList<>(curNodes);
+		ArrayList<Node> xqRes = visit(ctx.xq());
+		if (xqRes.isEmpty()) {
+			result.add(outFile.createElement("Empty"));
+		}
+		curNodes = curNodesCopy;
+		return result;
+	}
+
+	// help function for cond some
+	private boolean condSomeHelper(XQueryParser.CondSomeContext ctx, int index) {
+		// end of var, judge condition, if not empty then true
+		if (index == ctx.var().size()) {
+			return !visit(ctx.cond()).isEmpty();
+		}
+		// not the end of var
+		else {
+			String var = ctx.var(index).getText();
+			ArrayList<Node> xqList = visit(ctx.xq(index));
+			// iterate variable in Xq value (for)
+			// need to restore context for each level of variable
+			HashMap<String, ArrayList<Node>> contextMapBackup = new HashMap<>(VarsMap);
+			for (Node node : xqList) {
+				ArrayList<Node> newValue = new ArrayList<>();
+				newValue.add(node);
+				VarsMap.put(var, newValue);
+				// if one satisfy condition, then return true
+				if (condSomeHelper(ctx, index + 1)) {
+					VarsMap = contextMapBackup;
+					return true;
+				}
+				VarsMap = contextMapBackup;
+			}
+		}
+		return false;
+	}
+
+	// some var in xq (, var in xq) satisfies cond
+	@Override
+	public ArrayList<Node> visitCondSome(XQueryParser.CondSomeContext ctx) {
+		ArrayList<Node> result = new ArrayList<>();
+		ArrayList<Node> curNodesCopy = new ArrayList<>(curNodes);
+		boolean satisfy = condSomeHelper(ctx, 0);
+		curNodes = curNodesCopy;
+		if (satisfy) {
+			result.add(outFile.createElement("Satisfy"));
+		}
+		return result;
+	}
+
+	// xq1 == xq2 ,xq1 is xq2, use isSameNode
+	@Override
+	public ArrayList<Node> visitCondIs(XQueryParser.CondIsContext ctx) {
+		ArrayList<Node> result = new ArrayList<>();
+		ArrayList<Node> curNodesCopy = new ArrayList<>(curNodes);
+		ArrayList<Node> xq1Res = visit(ctx.xq(0));
+		curNodes = curNodesCopy;
+		ArrayList<Node> xq2Res = visit(ctx.xq(1));
+		for (Node node1 : xq1Res) {
+			for (Node node2 : xq2Res) {
+				if (node1.isSameNode(node2)) {
+					result.add(node1);
+				}
+			}
+		}
+		curNodes = curNodesCopy;
+		return result;
+	}
+
+	// not cond
+	@Override
+	public ArrayList<Node> visitCondNot(XQueryParser.CondNotContext ctx) {
+		ArrayList<Node> result = new ArrayList<>();
+		ArrayList<Node> curNodesCopy = new ArrayList<>(curNodes);
+		ArrayList<Node> condRes = visit(ctx.cond());
+		if (condRes.isEmpty()) {
+			result.add(outFile.createElement("Empty"));
+		}
+		curNodes = curNodesCopy;
+		return result;
+	}
+
+	// ( cond )
+	@Override
+	public ArrayList<Node> visitCondBrackets(XQueryParser.CondBracketsContext ctx) {
+		return visit(ctx.cond());
+	}
+
+	// xq1 == xq2, xq1 eq xq2, use isEqualNode
+	@Override
+	public ArrayList<Node> visitCondEqual(XQueryParser.CondEqualContext ctx) {
+		ArrayList<Node> result = new ArrayList<>();
+		ArrayList<Node> curNodesCopy = new ArrayList<>(curNodes);
+		ArrayList<Node> xq1Res = visit(ctx.xq(0));
+		curNodes = curNodesCopy;
+		ArrayList<Node> xq2Res = visit(ctx.xq(1));
+		for (Node node1 : xq1Res) {
+			for (Node node2 : xq2Res) {
+				if (node1.isEqualNode(node2)) {
+					result.add(node1);
+				}
+			}
+		}
+		curNodes = curNodesCopy;
+		return result;
 	}
 
 	// doc then rp
