@@ -11,6 +11,54 @@ StringConstant      : '"'[a-zA-Z0-9_ ,.!?;'"-]+'"';
 
 // parser rule
 // absolute path
+xq          : var                               # XqVar
+            | StringConstant                    # XqString
+            | ap                                # XqAp
+            | '(' xq ')'                        # XqBrackets
+            | xq ',' xq                         # XqConcat
+            | xq '/' rp                         # XqChildren
+            | xq '//' rp                        # XqAllDescendants
+            | leftTag '{' xq '}' rightTag       # XqInTag
+            | forClause letClause? whereClause?
+              returnClause                      # XqFLWR
+            | letClause xq                      # XqLetClause
+            ;
+
+
+leftTag    : '<' WORD '>'                       # XqLeftTag
+            ;
+
+rightTag    : '</' WORD '>'                     # XqRightTag
+            ;
+
+var         : '$' WORD
+            ;
+
+forClause   : 'for' var 'in' xq (',' var 'in' xq)*
+            ;
+
+letClause   : 'let' var ':=' xq (',' var ':=' xq)*
+            ;
+
+whereClause : 'where' cond
+            ;
+
+returnClause: 'return' xq
+            ;
+
+cond        : xq '=' xq                         # CondEqual
+            | xq 'eq' xq                        # CondEqual
+            | xq '==' xq                        # CondIs
+            | xq 'is' xq                        # CondIs
+            | 'empty' '(' xq ')'                # CondEmpty
+            | 'some' var 'in' xq (',' var 'in' xq)*
+              'satisfies' cond                  # CondSome
+            | '(' cond ')'                      # CondBrackets
+            | cond 'and' cond                   # CondAnd
+            | cond 'or' cond                    # CondOr
+            | 'not' cond                        # CondNot
+            ;
+
 ap          : doc '/' rp                        # ApChildren
             | doc '//' rp                       # ApAllDescendants
             ;
