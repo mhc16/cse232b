@@ -3,7 +3,9 @@ package cse232b.visitor;
 //java package
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -21,6 +23,19 @@ import org.w3c.dom.NodeList;
 public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> {
 	// use a nodelist to store the current visit node
 	private ArrayList<Node> curNodes = new ArrayList<Node>();
+	private HashMap<String, List<Node>> VarsMap = new HashMap<>();
+	private Document outFile;
+
+	XqueryExpressionBuilder() {
+		try {
+			DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+			outFile = docBuilder.newDocument();
+		} catch (Exception e) {
+			System.out.println("Initialize docBuilder failed!");
+			System.exit(1);
+		}
+	}
 
 	// util function
 	// remove duplicate node
@@ -55,6 +70,141 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 			result.addAll(visitNodeDescendants(ele));
 		}
 		return removeDuplicates(result);
+	}
+
+	// xq methods
+	@Override
+	public ArrayList<Node> visitXqVar(XQueryParser.XqVarContext ctx) {
+		ArrayList<Node> res = new ArrayList<>();
+		res.addAll(VarsMap.get(ctx.var().getText()));
+		return res;
+	}
+
+	@Override
+	public ArrayList<Node> visitXqString(XQueryParser.XqStringContext ctx) {
+		String temp = ctx.getText();
+		temp = temp.substring(1,temp.length()-1);
+		Node tempTxtNode = outFile.createTextNode(temp);
+		ArrayList<Node> res = new ArrayList<>();
+		res.add(tempTxtNode);
+		return res;
+	}
+
+	@Override
+	public ArrayList<Node> visitXqChildren(XQueryParser.XqChildrenContext ctx) {
+		curNodes = visit(ctx.xq());
+		ArrayList<Node> res = visit(ctx.rp());
+		curNodes = res;
+		return res;
+	}
+
+	@Override
+	public ArrayList<Node> visitXqAp(XQueryParser.XqApContext ctx) {
+		return visit(ctx.ap());
+	}
+
+
+	@Override public ArrayList<Node> visitXqInTag(XQueryParser.XqInTagContext ctx) {
+		ArrayList<Node> temps = visit(ctx.xq());
+		ArrayList<Node> res = new ArrayList<>();
+		Node tempNode = outFile.createElement(ctx.WORD(0).getText());
+		for (Node item:temps){
+			if (item!=null){
+				Node tempChild = outFile.importNode(item,true);
+				tempNode.appendChild(tempChild);
+			}
+		}
+		res.add(tempNode);
+		return res;
+	}
+
+	@Override
+	public ArrayList<Node> visitXqAllDescendants(XQueryParser.XqAllDescendantsContext ctx) {
+		curNodes = visit(ctx.xq());
+		curNodes = visitNodeListDescendants(curNodes);
+		ArrayList<Node> res = visit(ctx.rp());
+		res = removeDuplicates(res);
+		curNodes = res;
+		return res;
+	}
+
+	@Override public ArrayList<Node> visitXqLetClause(XQueryParser.XqLetClauseContext ctx) {
+		HashMap<String, List<Node>> mapCopy = new HashMap<>(VarsMap);
+		visit(ctx.letClause());
+		ArrayList<Node> res = visit(ctx.xq());
+		VarsMap = mapCopy;
+		return res;
+	}
+
+	@Override
+	public ArrayList<Node> visitXqConcat(XQueryParser.XqConcatContext ctx) {
+		ArrayList<Node> curNodesCopy = new ArrayList<>(curNodes);
+		ArrayList<Node> result = visit(ctx.xq(0));
+		curNodes = curNodesCopy;
+		result.addAll(visit(ctx.xq(1)));
+		result = removeDuplicates(result);
+		curNodes = result;
+		return result;
+	}
+
+	@Override public ArrayList<Node> visitXqBrackets(XQueryParser.XqBracketsContext ctx) {
+		return visit(ctx.xq());
+	}
+	@Override public ArrayList<Node> visitXqFLWR(XQueryParser.XqFLWRContext ctx) {
+		HashMap<String, List<Node>> mapCopy = new HashMap<>(VarsMap);
+		ArrayList<Node> res = new ArrayList<>();
+		subVisitFLWR(0,ctx,res);
+		VarsMap = mapCopy;
+		return res;
+	}
+
+	public void subVisitFLWR(int k,XQueryParser.XqFLWRContext ctx,ArrayList<Node> res){
+		if (k<ctx.forClause().var().size()) {
+			String varname = ctx.forClause().var(k).getText();
+			ArrayList<Node> values = visit(ctx.forClause().xq(k));
+
+			for (Node item : values) {
+				ArrayList<Node> temp = new ArrayList<>();
+				HashMap<String, List<Node>> mapCopy = new HashMap<>(VarsMap);
+				temp.add(item);
+				VarsMap.put(varname, temp);
+				subVisitFLWR(k + 1, ctx, res);
+				VarsMap = mapCopy;
+			}
+		} else {
+			if (ctx.letClause()!=null){
+				visit(ctx.letClause());
+			}
+			if (ctx.whereClause()!=null){
+				if (visit(ctx.whereClause())==null){
+					return;
+				}
+			}
+			res.addAll(visit(ctx.returnClause()));
+		}
+	}
+
+	@Override public ArrayList<Node> visitVar(XQueryParser.VarContext ctx) {
+		return new ArrayList<>();
+	}
+
+//	@Override public ArrayList<Node> visitForClause(XQueryParser.ForClauseContext ctx) {
+//		return visitChildren(ctx);
+//	}
+	@Override public ArrayList<Node> visitLetClause(XQueryParser.LetClauseContext ctx) {
+		int k = ctx.var().size();
+		for (int i=0; i<k; i++){
+			String varname = ctx.var(i).getText();
+			VarsMap.put(varname,visit(ctx.xq(i)));
+		}
+		return new ArrayList<>();
+	}
+	@Override public ArrayList<Node> visitWhereClause(XQueryParser.WhereClauseContext ctx) {
+		return visit(ctx.cond());
+	}
+
+	@Override public ArrayList<Node> visitReturnClause(XQueryParser.ReturnClauseContext ctx) {
+		return visit(ctx.xq());
 	}
 
 	// doc then rp

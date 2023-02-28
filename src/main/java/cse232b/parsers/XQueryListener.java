@@ -130,30 +130,6 @@ public interface XQueryListener extends ParseTreeListener {
 	 */
 	void exitXqString(XQueryParser.XqStringContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code XqLeftTag}
-	 * labeled alternative in {@link XQueryParser#leftTag}.
-	 * @param ctx the parse tree
-	 */
-	void enterXqLeftTag(XQueryParser.XqLeftTagContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code XqLeftTag}
-	 * labeled alternative in {@link XQueryParser#leftTag}.
-	 * @param ctx the parse tree
-	 */
-	void exitXqLeftTag(XQueryParser.XqLeftTagContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code XqRightTag}
-	 * labeled alternative in {@link XQueryParser#rightTag}.
-	 * @param ctx the parse tree
-	 */
-	void enterXqRightTag(XQueryParser.XqRightTagContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code XqRightTag}
-	 * labeled alternative in {@link XQueryParser#rightTag}.
-	 * @param ctx the parse tree
-	 */
-	void exitXqRightTag(XQueryParser.XqRightTagContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link XQueryParser#var}.
 	 * @param ctx the parse tree
 	 */
