@@ -18,18 +18,13 @@ xq          : var                               # XqVar
             | xq ',' xq                         # XqConcat
             | xq '/' rp                         # XqChildren
             | xq '//' rp                        # XqAllDescendants
-            | leftTag '{' xq '}' rightTag       # XqInTag
+            | '<' WORD '>' '{' xq '}' '</' WORD '>'   # XqInTag
             | forClause letClause? whereClause?
               returnClause                      # XqFLWR
             | letClause xq                      # XqLetClause
             ;
 
 
-leftTag    : '<' WORD '>'                       # XqLeftTag
-            ;
-
-rightTag    : '</' WORD '>'                     # XqRightTag
-            ;
 
 var         : '$' WORD
             ;

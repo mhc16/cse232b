@@ -42,7 +42,8 @@ public class XqueryProgramBuilder {
 		XQueryLexer lexer = new XQueryLexer(antlrInputStream);
 		CommonTokenStream tokenStream = new CommonTokenStream(lexer);
 		XQueryParser xQueryParser = new XQueryParser(tokenStream);
-		ParseTree tree = xQueryParser.ap();
+		// change from rp to xq
+		ParseTree tree = xQueryParser.xq();
 		XqueryExpressionBuilder builder = new XqueryExpressionBuilder();
 		// retrieve results
 		ArrayList<Node> result = builder.visit(tree);
@@ -62,12 +63,13 @@ public class XqueryProgramBuilder {
 		}
 		Document document = documentBuilder.newDocument();
 		// Add query result to xml object
-		Node xmlResult = document.createElement("RESULT");
+		// not surround by "result"
+		// Node xmlResult = document.createElement("RESULT");
 		for (Node node : result) {
 			Node nodeCopy = document.importNode(node, true);
-			xmlResult.appendChild(nodeCopy);
+			document.appendChild(nodeCopy);
 		}
-		document.appendChild(xmlResult);
+		//document.appendChild(xmlResult);
 		return document;
 	}
 

@@ -83,20 +83,6 @@ public interface XQueryVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitXqString(XQueryParser.XqStringContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code XqLeftTag}
-	 * labeled alternative in {@link XQueryParser#leftTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitXqLeftTag(XQueryParser.XqLeftTagContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code XqRightTag}
-	 * labeled alternative in {@link XQueryParser#rightTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitXqRightTag(XQueryParser.XqRightTagContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link XQueryParser#var}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
