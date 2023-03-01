@@ -75,9 +75,10 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 	private void subVisitFLWR(int k, XQueryParser.XqFLWRContext ctx, ArrayList<Node> res) {
 		// for clause part
 		if (k < ctx.forClause().var().size()) {
+			ArrayList<Node> curNodesCopy = new ArrayList<>(curNodes);
 			String varname = ctx.forClause().var(k).getText();
 			ArrayList<Node> values = visit(ctx.forClause().xq(k));
-			ArrayList<Node> curNodesCopy = new ArrayList<>(curNodes);
+
 
 			for (Node item : values) {
 				ArrayList<Node> temp = new ArrayList<>();
