@@ -77,17 +77,20 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 		if (k < ctx.forClause().var().size()) {
 			String varname = ctx.forClause().var(k).getText();
 			ArrayList<Node> values = visit(ctx.forClause().xq(k));
+			ArrayList<Node> curNodesCopy = new ArrayList<>(curNodes);
 
 			for (Node item : values) {
 				ArrayList<Node> temp = new ArrayList<>();
 				// backup
 				HashMap<String, ArrayList<Node>> mapCopy = new HashMap<>(VarsMap);
 				temp.add(item);
+				curNodes = temp;
 				VarsMap.put(varname, temp);
 				subVisitFLWR(k + 1, ctx, res);
 				// restore
 				VarsMap = mapCopy;
 			}
+			curNodes = curNodesCopy;
 		} else {
 			// let clause part if exist
 			if (ctx.letClause() != null) {
@@ -142,6 +145,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 			return res;
 		}
 		res.addAll(VarsMap.get(ctx.var().getText()));
+		curNodes = res;
 		return res;
 	}
 
@@ -251,10 +255,13 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 	@Override
 	public ArrayList<Node> visitLetClause(XQueryParser.LetClauseContext ctx) {
 		int k = ctx.var().size();
+		ArrayList<Node> curNodesCopy = new ArrayList<>(curNodes);
 		for (int i = 0; i < k; i++) {
 			String varname = ctx.var(i).getText();
 			VarsMap.put(varname, visit(ctx.xq(i)));
+			curNodes = new ArrayList<>(curNodesCopy);
 		}
+		curNodes = curNodesCopy;
 		return new ArrayList<>();
 	}
 
