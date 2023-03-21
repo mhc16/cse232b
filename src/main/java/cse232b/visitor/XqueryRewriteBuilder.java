@@ -5,15 +5,6 @@ package cse232b.visitor;
 import cse232b.parsers.XQueryBaseVisitor;
 import cse232b.parsers.XQueryParser;
 import javafx.util.Pair;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.awt.*;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -137,7 +128,7 @@ public class XqueryRewriteBuilder extends XQueryBaseVisitor<String> {
     public String visitReturnClause(XQueryParser.ReturnClauseContext ctx) {
         StringBuilder result = new StringBuilder();
         HashSet<String> curVars = new HashSet<>();
-        Integer start = vars2id.get(crossConds.get(0).getKey());
+        Integer start = 0;
         result.append(subQueries.get(start).Sequentialize());
         curVars.addAll(subQueries.get(start).vars);
         HashSet<Integer> curIds = new HashSet<>();
@@ -207,9 +198,9 @@ public class XqueryRewriteBuilder extends XQueryBaseVisitor<String> {
         result.deleteCharAt(result.length()-2);
         result.insert(0, "for $tuple in ");
         String returnText = ctx.getText();
-        returnText = returnText.replace("return", "return\n");
-        returnText = returnText.replaceAll("\\$([A-Za-z0-9_]+)", "\\$tuple/$1/*");
+        returnText = returnText.replaceAll("\\$([a-zA-Z0-9_-]+)", "\\$tuple/$1/*");
         returnText = returnText.replaceAll(",", ",\n");
+        returnText = returnText.replaceAll("return", "return ");
         result.append(returnText);
         return result.toString();
 

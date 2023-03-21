@@ -40,21 +40,17 @@ public class XqueryProgramBuilder {
 			System.exit(1);
 		}
 		// retrieve result
+		XqueryExpressionBuilder baseBuilder = new XqueryExpressionBuilder();
+		XqueryRewriteBuilder rewriteBuilder = new XqueryRewriteBuilder();
 		// base pattern
-		if (pattern.equals("Op")) {
-			XQueryLexer lexer = new XQueryLexer(antlrInputStream);
-			CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-			XQueryParser xQueryParser = new XQueryParser(tokenStream);
-			// change from rp to xq
-			ParseTree tree = xQueryParser.xq();
-			XqueryRewriteBuilder rewriteBuilder = new XqueryRewriteBuilder();
-			String rewrite = rewriteBuilder.visit(tree);
-			System.out.println("===\n" + rewrite + "\n===");
-			antlrInputStream = new ANTLRInputStream(rewrite);
-
+		if (pattern.equals("0")) {
+			return retrieveExpressionBuilderResult(antlrInputStream, baseBuilder);
 		}
-		XqueryExpressionBuilder builder = new XqueryExpressionBuilder();
-		return retrieveExpressionBuilderResult(antlrInputStream, builder);
+		// optimized pattern
+		String rewrite = retrieveExpressionBuilderResult(antlrInputStream, rewriteBuilder);
+		System.out.println("===\n" + rewrite + "\n===");
+		antlrInputStream = new ANTLRInputStream(rewrite);
+		return retrieveExpressionBuilderResult(antlrInputStream, baseBuilder);
 	}
 
 	// retrieve results from different expression builder
@@ -165,7 +161,7 @@ public class XqueryProgramBuilder {
 			System.exit(1);
 		}
 		long etime = System.currentTimeMillis();
-		System.out.printf("execution time in ms %d", (etime - stime));
+		System.out.printf("Query's execution time is %d ms", (etime - stime));
 	}
 
 }
