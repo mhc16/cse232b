@@ -1,5 +1,7 @@
 package cse232b.visitor;
 
+import java.awt.Frame;
+import java.awt.List;
 //java package
 import java.io.File;
 import java.util.ArrayList;
@@ -15,6 +17,7 @@ import cse232b.parsers.XQueryParser;
 
 //xml package
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -79,7 +82,6 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 			String varname = ctx.forClause().var(k).getText();
 			ArrayList<Node> values = visit(ctx.forClause().xq(k));
 
-
 			for (Node item : values) {
 				ArrayList<Node> temp = new ArrayList<>();
 				// backup
@@ -136,7 +138,112 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 		return false;
 	}
 
+	// help function for hash join
+	// return list of attr names
+	private ArrayList<String> getNameList(XQueryParser.NameListContext ctx) {
+		ArrayList<String> result = new ArrayList<>();
+		for (int i = 0; i < ctx.WORD().size(); i++) {
+			result.add(ctx.WORD().get(i).getText());
+		}
+		return result;
+	}
+
+	// merge tuple node pair
+	private Node mergeTuplePair(Node leftTuple, Node rightTuple) {
+		// create element node
+		Element element = outFile.createElement("tuple");
+		NodeList leftNodeList = leftTuple.getChildNodes();
+		NodeList rightNodeList = rightTuple.getChildNodes();
+		// merge tuples into 1
+		for (int i = 0; i < leftNodeList.getLength(); i++) {
+			element.appendChild(leftNodeList.item(i).cloneNode(true));
+		}
+		for (int i = 0; i < rightNodeList.getLength(); i++) {
+			element.appendChild(rightNodeList.item(i).cloneNode(true));
+		}
+		return element;
+	}
+
+	// create tuple index
+	private String createTupleIndex(Node tuple, ArrayList<String> nameList) {
+		// combine content of node with tag in nameList, use hashmap to store tuple tag
+		// name
+		NodeList nodeList = tuple.getChildNodes();
+		HashMap<String, String> tupleContent = new HashMap<>();
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			tupleContent.put(nodeList.item(i).getNodeName(), nodeList.item(i).getTextContent());
+		}
+		String result = "";
+		for (String name : nameList) {
+			result += "@" + tupleContent.get(name) + " ";
+		}
+		return result;
+	}
+
 	// xq methods
+	// joinClause
+	@Override
+	public ArrayList<Node> visitXqJoinClause(XQueryParser.XqJoinClauseContext ctx) {
+		return visit(ctx.joinClause());
+	}
+
+	// join (xq1, xq2, nameList1, nameList2)
+	@Override
+	public ArrayList<Node> visitJoinClause(XQueryParser.JoinClauseContext ctx) {
+		// back up
+		ArrayList<Node> curNodesCopy = new ArrayList<>(curNodes);
+		// get 1st and 2nd tables
+		ArrayList<Node> leftTable = visit(ctx.xq(0));
+		curNodes = curNodesCopy;
+		ArrayList<Node> rightTable = visit(ctx.xq(1));
+		// get content of 2 nameList
+		ArrayList<String> leftNames = getNameList(ctx.nameList(0));
+		ArrayList<String> rightNames = getNameList(ctx.nameList(1));
+		// result
+		ArrayList<Node> result = new ArrayList<>();
+
+		// case 1: no nameList, implement cartesian product
+		if (leftNames.isEmpty() || rightNames.isEmpty()) {
+			for (Node leftTuple : leftTable) {
+				for (Node rightTuple : rightTable) {
+					result.add(mergeTuplePair(leftTuple, rightTuple));
+				}
+			}
+		}
+		// case 2: hash join on the same name of table pair
+		else {
+			// build hash index on 2nd table
+			HashMap<String, ArrayList<Node>> table2HashIndex = new HashMap<>();
+			for (Node rightTuple : rightTable) {
+				String rTupleIndex = createTupleIndex(rightTuple, rightNames);
+				// index not exist
+				if (!table2HashIndex.containsKey(rTupleIndex)) {
+					table2HashIndex.put(rTupleIndex, new ArrayList<>());
+				}
+				// append hash table content
+				table2HashIndex.get(rTupleIndex).add(rightTuple);
+			}
+			// use hash join to merge tuple with the same key
+			for (Node leftTuple : leftTable) {
+				String lTupleIndex = createTupleIndex(leftTuple, leftNames);
+				// index exists in hashmap
+				if (table2HashIndex.containsKey(lTupleIndex)) {
+					for (Node rightTuple : table2HashIndex.get(lTupleIndex)) {
+						result.add(mergeTuplePair(leftTuple, rightTuple));
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+	// nothing to do
+	@Override
+	public ArrayList<Node> visitNameList(XQueryParser.NameListContext ctx) {
+		return new ArrayList<>();
+	}
+
 	// return context var value, empty if not exist
 	@Override
 	public ArrayList<Node> visitXqVar(XQueryParser.XqVarContext ctx) {
