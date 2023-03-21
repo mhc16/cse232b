@@ -509,7 +509,7 @@ public class XqueryExpressionBuilder extends XQueryBaseVisitor<ArrayList<Node>> 
 	@Override
 	public ArrayList<Node> visitApChildren(XQueryParser.ApChildrenContext ctx) {
 		visit(ctx.doc());
-		System.out.println(curNodes);
+//		System.out.println(curNodes);
 		return visit(ctx.rp());
 
 	}

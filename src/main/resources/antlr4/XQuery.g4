@@ -15,9 +15,9 @@ xq          : var                               # XqVar
             | StringConstant                    # XqString
             | ap                                # XqAp
             | '(' xq ')'                        # XqBrackets
-            | xq ',' xq                         # XqConcat
             | xq '/' rp                         # XqChildren
             | xq '//' rp                        # XqAllDescendants
+            | xq ',' xq                         # XqConcat
             | '<' WORD '>' '{' xq '}' '</' WORD '>'   # XqInTag
             | forClause letClause? whereClause?
               returnClause                      # XqFLWR

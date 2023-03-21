@@ -41,13 +41,20 @@ public class XqueryProgramBuilder {
 		}
 		// retrieve result
 		// base pattern
-		if (pattern.equals("0")) {
-			XqueryExpressionBuilder builder = new XqueryExpressionBuilder();
-			return retrieveExpressionBuilderResult(antlrInputStream, builder);
-		}
-		// optimized pattern -- need implement here
+		if (pattern.equals("Op")) {
+			XQueryLexer lexer = new XQueryLexer(antlrInputStream);
+			CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+			XQueryParser xQueryParser = new XQueryParser(tokenStream);
+			// change from rp to xq
+			ParseTree tree = xQueryParser.xq();
+			XqueryRewriteBuilder rewriteBuilder = new XqueryRewriteBuilder();
+			String rewrite = rewriteBuilder.visit(tree);
+			System.out.println("===\n" + rewrite + "\n===");
+			antlrInputStream = new ANTLRInputStream(rewrite);
 
-		return result;
+		}
+		XqueryExpressionBuilder builder = new XqueryExpressionBuilder();
+		return retrieveExpressionBuilderResult(antlrInputStream, builder);
 	}
 
 	// retrieve results from different expression builder
@@ -124,10 +131,15 @@ public class XqueryProgramBuilder {
 		// get input file; output file; pattern
 		String inputFile = args[0];
 		String outputFile = args[1];
-		String pattern = "0";
+		String pattern = "";
 		if (args.length == 3) {
 			pattern = args[2];
 		}
+//		String inputFile = "test1.txt";
+//        String outputFile = "output3.xml";
+//		String pattern = "Op";
+		long stime = System.currentTimeMillis();
+
 		// Parse Input Query, retrieve results
 		ArrayList<Node> result = retrieveXQueryResult(inputFile, pattern);
 		// System.out.println(result);
@@ -152,6 +164,8 @@ public class XqueryProgramBuilder {
 			System.out.println("Transform process failed!");
 			System.exit(1);
 		}
+		long etime = System.currentTimeMillis();
+		System.out.printf("execution time in ms %d", (etime - stime));
 	}
 
 }
