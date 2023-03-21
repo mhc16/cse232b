@@ -22,6 +22,7 @@ xq          : var                               # XqVar
             | forClause letClause? whereClause?
               returnClause                      # XqFLWR
             | letClause xq                      # XqLetClause
+            | joinClause						# XqJoinClause
             ;
 
 
@@ -39,7 +40,14 @@ whereClause : 'where' cond
             ;
 
 returnClause: 'return' xq
+			;
+			
+joinClause	: 'join' '(' xq ',' xq ',' nameList ',' nameList ')'
             ;
+            
+nameList	: '[' ']'
+			| '[' WORD (',' WORD)* ']'
+			;
 
 cond        : xq '=' xq                         # CondEqual
             | xq 'eq' xq                        # CondEqual
