@@ -1,4 +1,3 @@
-addr: C:\Users\mafen\OneDrive\桌面\cse232b_Huichen Ma_Han Cao-1\cse232b-master
 command: java -jar cse232b_milestone3.jar test/milestone3/test1.txt output10.xml 0
 command argument help:
 java -jar cse232b_milestone3.jar [input file] [output file] [0,1]?
